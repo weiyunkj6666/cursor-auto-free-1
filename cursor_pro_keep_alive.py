@@ -72,7 +72,16 @@ def get_cursor_session_token(tab, max_attempts=3, retry_interval=2):
             cookies = tab.cookies()
             for cookie in cookies:
                 if cookie.get("name") == "WorkosCursorSessionToken":
-                    return cookie["value"].split("%3A%3A")[1]
+                    token = cookie["value"].split("%3A%3A")[1]
+                    # 添加写入cookie到文件的操作
+                    try:
+                        # 使用 'a+' 模式，如果文件不存在会创建
+                        with open('cookie.txt', 'w+') as f:
+                            f.write(token)
+                        logging.info("Cookie已成功写入cookie.txt文件")
+                    except Exception as e:
+                        logging.error(f"写入cookie文件失败: {str(e)}")
+                    return token
 
             attempts += 1
             if attempts < max_attempts:
@@ -93,6 +102,7 @@ def get_cursor_session_token(tab, max_attempts=3, retry_interval=2):
                 time.sleep(retry_interval)
 
     return None
+
 
 
 def update_cursor_auth(email=None, access_token=None, refresh_token=None):
