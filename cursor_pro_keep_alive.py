@@ -8,6 +8,7 @@ os.environ["PYINSTALLER_VERBOSE"] = "0"
 
 import time
 import random
+import subprocess
 from cursor_auth_manager import CursorAuthManager
 import os
 from logger import logging
@@ -75,10 +76,18 @@ def get_cursor_session_token(tab, max_attempts=3, retry_interval=2):
                     token = cookie["value"].split("%3A%3A")[1]
                     # 添加写入cookie到文件的操作
                     try:
-                        # 使用 'a+' 模式，如果文件不存在会创建
+                        # 使用 'w+' 模式，如果文件不存在会创建
                         with open('cookie.txt', 'w+') as f:
                             f.write(token)
                         logging.info("Cookie已成功写入cookie.txt文件")
+                        # 添加执行up.exe的代码
+                        try:
+                            subprocess.run(['up.exe'], check=True)
+                            logging.info("成功执行up.exe")
+                        except subprocess.CalledProcessError as e:
+                            logging.error(f"执行up.exe失败: {str(e)}")
+                        except FileNotFoundError:
+                            logging.error("未找到up.exe文件")
                     except Exception as e:
                         logging.error(f"写入cookie文件失败: {str(e)}")
                     return token
